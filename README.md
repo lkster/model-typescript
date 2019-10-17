@@ -4,12 +4,12 @@ Utilities for creating mutable and immutable models supported by TypeScript
 
 ## Table of Contents
 
-1. [Getting Started](#Getting-Started)
-1. [Immutable Model](#Immutable-Model)
-    1. [Complex Types](#Complex-Types)
-    1. [Deep Model Nesting](#Deep-Model-Nesting)
-1. [Contribution](#Contribution)
-1. [What's To Do](#What's-To-Do)
+1. [Getting Started](#getting-started)
+1. [Immutable Model](#immutable-model)
+    1. [Complex Types](#complex-types)
+    1. [Deep Model Nesting](#deep-model-nesting)
+1. [Contribution](#contribution)
+1. [What's To Do](#whats-to-do)
 
 ## Getting Started
 
@@ -26,7 +26,7 @@ This package needs `reflect-metadata` to work (you can find it [here](https://ww
 Immutable model allows you to create domain model for data that are completely immutable. The key is to just extend the model class with `ImmutableModel` and add `Prop` decorator for each property. The usage is as follows:
 
 ```ts
-import { ImmutableModel, Prop } from 'model-typecsript';
+import { ImmutableModel, Prop } from 'model-typescript';
 
 class UserModel extends ImmutableModel<UserModel> {
     @Prop public readonly id: number;
