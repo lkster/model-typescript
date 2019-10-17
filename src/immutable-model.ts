@@ -25,7 +25,7 @@ export abstract class ImmutableModel<T> {
     }
 
     private initModel(data: any): void {
-        const properties: IPropertyDeclaration[] = Reflect.getMetadata(MODEL_PROPS_METADATA_KEY, (this as any).constructor);
+        const properties: IPropertyDeclaration[] = Reflect.getMetadata(MODEL_PROPS_METADATA_KEY, this.constructor);
 
         for (let declaration of properties) {
             switch (declaration.type) {
