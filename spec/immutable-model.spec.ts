@@ -1,4 +1,4 @@
-import { ImmutableModel, Prop } from '@/index';
+import { ImmutableModel, Prop } from '../dist';
 
 interface SomeObject {
     a: string;
@@ -16,6 +16,14 @@ class TestObjectModel extends ImmutableModel<TestObjectModel> {
 
 class TestArrayModel extends ImmutableModel<TestArrayModel> {
     @Prop public readonly arr: string[][];
+}
+
+class TestWithModel extends ImmutableModel<TestWithModel> {
+    @Prop public readonly test: TestModel;
+}
+
+class TestWithDeepModel extends ImmutableModel<TestWithDeepModel> {
+    @Prop public readonly deep: TestWithModel;
 }
 
 describe('Immutable Model', () => {
@@ -76,6 +84,34 @@ describe('Immutable Model', () => {
             expect(model.arr).not.toBe(arr);
             expect(model.arr[0]).not.toBe(arr[0]);
             expect(model.arr[1]).not.toBe(arr[1]);
+        });
+
+        it('should create immutable models for provided plain data', () => {
+            const model = new TestWithDeepModel({
+                deep: {
+                    test: {
+                        id: 2,
+                        name: 'some name'
+                    }
+                }
+            });
+
+            expect(model.deep).toBeInstanceOf(ImmutableModel);
+            expect(model.deep.test).toBeInstanceOf(ImmutableModel);
+        });
+
+        it('should pass immutable models if provided data has them already created', () => {
+            const model = new TestWithDeepModel({
+                deep: new TestWithModel({
+                    test: new TestModel({
+                        id: 2,
+                        name: 'some name',
+                    }),
+                }),
+            });
+
+            expect(model.deep).toBeInstanceOf(ImmutableModel);
+            expect(model.deep.test).toBeInstanceOf(ImmutableModel);
         });
     });
 
