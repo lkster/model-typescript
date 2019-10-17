@@ -3,16 +3,17 @@ import { MODEL_PROPS_METADATA_KEY } from './constants/metadata-keys';
 import { IPropertyDeclaration } from './interfaces/property-declaration.interface';
 import { PropertyTypeEnum } from './enums/property-type.enum';
 import { ObjectUtils } from './utils/object.utils';
+import { ModelPropertiesOf } from './types/model-properties-of.type';
 
 
 export abstract class ImmutableModel<T> {
 
-    public constructor(data: any) {
+    public constructor(data: ModelPropertiesOf<T, ImmutableModel<any>>) {
         this.initModel(data);
         Object.freeze(this);
     }
 
-    public set(data: any): T {
+    public set(data: Partial<ModelPropertiesOf<T, ImmutableModel<any>>>): T {
         return new (this as any).constructor({
             ...this,
             ...data,
@@ -30,6 +31,16 @@ export abstract class ImmutableModel<T> {
             switch (declaration.type) {
                 case PropertyTypeEnum.PROPERTY: {
                     this[declaration.key] = ObjectUtils.deepFreeze(deepClone(data[declaration.key]));
+                    break;
+                }
+                
+                case PropertyTypeEnum.MODEL_REF: {
+                    if (data[declaration.key] instanceof ImmutableModel) {
+                        this[declaration.key] = data[declaration.key];
+                    } else {
+                        this[declaration.key] = new declaration.model(data[declaration.key]);
+                    }
+
                     break;
                 }
             }
