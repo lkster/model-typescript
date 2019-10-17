@@ -1,14 +1,19 @@
 {
   "name": "model-typescript",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "1.0.1",
+  "description": "TypeScript immutable model",
+  "keywords": ["typescript", "ts", "model", "immutable", "decorator", "domain"],
+  "main": "index.ts",
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/index.ts",
     "test": "jest --watch"
   },
   "author": "Dominik Mielcarek",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ThaFog/model-typescript.git"
+  },
   "devDependencies": {
     "@types/clone-deep": "^4.0.1",
     "@types/jest": "^24.0.19",

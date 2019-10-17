@@ -2,7 +2,7 @@ import util from 'util';
 
 export class ObjectUtils {
 
-    // https://stackoverflow.com/questions/1173549/how-to-determine-if-an-object-is-an-object-literal-in-javascript/1482209#1482209
+    // https://stackoverflow.com/a/1482209/3788615
     public static isPlainObject(object: any): boolean {
         if (typeof object !== 'object' || object === null) {
             return false;
