@@ -84,7 +84,9 @@ const model = new DataModel(data);
 expect(data.someObject).not.toBe(model.someObject);
 ```
 
-Other complex types like own classes or packages are not handled. If you plan to use some mutable class the best case is to override `initModel` method (as it will affect also both `clone` and `set` methods) and handle cloning your custom classes there. Be sure to also lock your entity with `Object.freeze()` method or something custom
+Other complex types like own classes or packages are not handled. If you plan to use some mutable class the best case is to override `initModel` method (as it will affect also both `clone` and `set` methods) and handle cloning your custom classes there. Be sure to also lock your entity with `Object.freeze()` method or something custom.
+
+As some native JavaScript objects like `Set`, `Map` or `Date` can't be frozen, to gain 100% immutability I'd highly suggest to use [Immutable.js](https://npmjs.com/package/immutable) for data structure objects and [Luxon](https://npmjs.com/package/luxon) instead of `Date`.
 
 ```ts
 import moment from 'moment';
@@ -151,6 +153,5 @@ To help development on this project there are few npm scripts:
 
 - `ModelRef` decorator in case of no `emitDecoratorMetadata` available to set
 - Mutable model implementation
-- Copying and freezing all natively supported complex types (`Map`, `Set`, `Date`, etc.)
 - Global transformers in case of having lot of custom objects values (like `moment` in almost all models). This after setting it up would handle cloning and freezing custom objects out-of-box
 - Anything you'd suggest (of course within reason lol)
