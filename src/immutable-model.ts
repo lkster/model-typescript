@@ -1,6 +1,9 @@
+import deepClone from 'clone-deep';
 import { MODEL_PROPS_METADATA_KEY } from './constants/metadata-keys';
 import { IPropertyDeclaration } from './interfaces/property-declaration.interface';
 import { PropertyTypeEnum } from './enums/property-type.enum';
+import { ObjectUtils } from './utils/object.utils';
+
 
 export abstract class ImmutableModel<T> {
 
@@ -15,7 +18,7 @@ export abstract class ImmutableModel<T> {
         for (let declaration of properties) {
             switch (declaration.type) {
                 case PropertyTypeEnum.PROPERTY: {
-                    this[declaration.key] = data[declaration.key];
+                    this[declaration.key] = ObjectUtils.deepFreeze(deepClone(data[declaration.key]));
                     break;
                 }
             }
