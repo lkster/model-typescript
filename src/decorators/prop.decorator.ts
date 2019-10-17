@@ -1,9 +1,9 @@
 import util from 'util';
-import { MODEL_PROPS_METADATA_KEY } from '@/constants/metadata-keys'
-import { TPropertyKey } from '@/types/property-key.type'
-import { PropertyTypeEnum } from '@/enums/property-type.enum';
-import { IPropertyDeclaration } from '@/interfaces/property-declaration.interface';
-import { ImmutableModel } from '@/immutable-model';
+import { MODEL_PROPS_METADATA_KEY } from '../constants/metadata-keys'
+import { TPropertyKey } from '../types/property-key.type'
+import { PropertyTypeEnum } from '../enums/property-type.enum';
+import { IPropertyDeclaration } from '../interfaces/property-declaration.interface';
+import { ImmutableModel } from '../immutable-model';
 
 
 function propDecorator(target: any, key: TPropertyKey): void {
