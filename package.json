@@ -1,12 +1,23 @@
 {
   "name": "model-typescript",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "TypeScript immutable model",
-  "keywords": ["typescript", "ts", "model", "immutable", "decorator", "domain"],
-  "main": "index.ts",
+  "keywords": [
+    "typescript",
+    "ts",
+    "model",
+    "immutable",
+    "decorator",
+    "domain"
+  ],
+  "main": "dist/index.js",
+  "types": "index.d.ts",
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register src/index.ts",
-    "test": "jest --watch"
+    "start": "ts-node -r tsconfig-paths/register test.ts",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "test": "jest --watch",
+    "prepublish": "npm run build"
   },
   "author": "Dominik Mielcarek",
   "license": "MIT",
@@ -19,6 +30,7 @@
     "@types/jest": "^24.0.19",
     "@types/node": "^12.11.1",
     "jest": "^24.9.0",
+    "rimraf": "^3.0.0",
     "ts-jest": "^24.1.0",
     "tsconfig-paths": "^3.9.0",
     "typescript": "^3.6.4"

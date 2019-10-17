@@ -1,15 +1,22 @@
 {
     "compilerOptions": {
-      "module": "commonjs",
-      "target": "es6",
-      "sourceMap": true,
-      "declaration": true,
-      "esModuleInterop": true,
-      "experimentalDecorators": true,
-      "emitDecoratorMetadata": true,
+        "module": "commonjs",
+        "target": "es6",
+        "sourceMap": true,
+        "declaration": true,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "outDir": "./dist",
+        "types": [
+            "reflect-metadata",
+            "@types/node",
+            "jest"
+        ],
         "baseUrl": "./"
     },
     "exclude": [
-      "node_modules"
+        "node_modules",
+        "spec"
     ]
-  }
+}
