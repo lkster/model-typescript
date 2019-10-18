@@ -7,6 +7,8 @@ describe('Object Utils', () => {
         it('should return true if object is plain object', () => {
             expect(ObjectUtils.isPlainObject({})).toBe(true);
             expect(ObjectUtils.isPlainObject(new Object())).toBe(true);
+            expect(ObjectUtils.isPlainObject({ constructor: 'something' })).toBe(true);
+            expect(ObjectUtils.isPlainObject({ prototype: 'something' })).toBe(true);
         });
 
         it('should return false if object is not plain object', () => {

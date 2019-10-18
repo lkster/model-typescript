@@ -1,4 +1,4 @@
-import { ImmutableModel, Prop } from '../dist';
+import { ImmutableModel, Prop } from '..';
 
 interface SomeObject {
     a: string;
