@@ -1,4 +1,4 @@
-import { ImmutableModel } from 'src/immutable-model';
+import { ImmutableModel } from '../immutable-model';
 
 type PropertiesKeysOf<T> = {
     [Key in keyof T]:

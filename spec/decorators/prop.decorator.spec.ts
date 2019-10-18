@@ -1,74 +1,81 @@
-import 'reflect-metadata';
+/// <reference types="reflect-metadata" />
 
-import { Prop } from '../..';
-// import { Prop } from '../../src/decorators/prop.decorator';
-import { MODEL_PROPS_METADATA_KEY } from '../../dist/constants/metadata-keys';
-import { ImmutableModel } from '../../dist/immutable-model';
-import { PropertyTypeEnum } from '../../dist/enums/property-type.enum';
-
+import * as BasePropDecoratorModule from '../../src/decorators/base-prop.decorator';
+import { ImmutableModel, Prop } from '../../src';
 
 describe('Prop decorator', () => {
     
-    function PropDecoratorTests(propDecorator: any): void {
+    class TestModel extends ImmutableModel<TestModel> {}
 
-        describe('assigning array to store data in metadata', () => {
-            
-            class mockClass {}
-            const mockKey = 'some key';
+    const decorator = jest.fn();
 
-            it('should assign new array to class metadata if there are not any assigned yet', () => {
-                Reflect.defineMetadata(MODEL_PROPS_METADATA_KEY, undefined, mockClass);
-                propDecorator(new mockClass(), mockKey);
+    beforeEach(() => {
+        (BasePropDecoratorModule as any).BasePropDecorator = jest.fn(x => decorator) as any;
+    });
 
-                expect(Reflect.getMetadata(MODEL_PROPS_METADATA_KEY, mockClass)).toBeInstanceOf(Array);
-            });
+    describe('target and key provided', () => {
+        
+        it('should call BasePropDecorator with data from design:type metadata', () => {
+            const target = class Target {};
+            const key = 'some key';
+            Reflect.defineMetadata('design:type', 'some type', target, key);
 
-            it('should push new value to actually existing array in class metadata', () => {
-                const arr = [];
-                Reflect.defineMetadata(MODEL_PROPS_METADATA_KEY, arr, mockClass);
+            Prop(target, key);
 
-                propDecorator(new mockClass(), mockKey);
-
-                expect(Reflect.getMetadata(MODEL_PROPS_METADATA_KEY, mockClass)).toBe(arr);
-            });
+            expect(BasePropDecoratorModule.BasePropDecorator).toHaveBeenCalledWith('some type');
         });
 
-        describe('assigning metadata', () => {
-            
-            class mockClass {};
-            class TestModel extends ImmutableModel<TestModel> {}
-            const mockKey = 'some key';
+        it('should call BasePropDecorator with empty object if design:type metadata is empty', () => {
+            const target = class Target {};
+            const key = 'some key';
 
-            it('should add property declaration for property', () => {
-                const arr = [];
-                Reflect.defineMetadata(MODEL_PROPS_METADATA_KEY, arr, mockClass);
-                
-                propDecorator(new mockClass(), mockKey);
+            Prop(target, key);
 
-                expect(arr[0]).toEqual({
-                    key: 'some key',
-                    type: PropertyTypeEnum.PROPERTY,
-                });
-            });
-
-            it('should add property declaration for model reference if emitDecoratorMetadata is enabled', () => {
-                const arr = [];
-                const instance = new mockClass();
-
-                Reflect.defineMetadata(MODEL_PROPS_METADATA_KEY, arr, mockClass);
-                Reflect.defineMetadata('design:type', TestModel, instance, mockKey);
-
-                propDecorator(instance, mockKey);
-
-                expect(arr[0]).toEqual({
-                    key: 'some key',
-                    type: PropertyTypeEnum.MODEL_REF,
-                    model: TestModel,
-                });
-            });
+            expect(BasePropDecoratorModule.BasePropDecorator).toHaveBeenCalledWith({});
         });
 
-    }
+        it('should call returned by BasePropDecorator decorator with given target and key', () => {
+            const target = class Target {};
+            const key = 'some key';
 
-    PropDecoratorTests(Prop);
+            Prop(target, key);
+
+            expect(decorator).toHaveBeenCalledWith(target, key);
+        });
+    });
+
+    describe('target and key not provided', () => {
+        
+        it('should return decorator', () => {
+            expect(Prop()).toBeInstanceOf(Function);
+        });
+
+        it('should returned decorator call BasePropDecorator with data from design:type metadata on call', () => {
+            const target = class Target {};
+            const key = 'some key';
+            Reflect.defineMetadata('design:type', 'some type', target, key);
+
+            Prop()(target, key);
+
+            expect(BasePropDecoratorModule.BasePropDecorator).toHaveBeenCalledWith('some type');
+        });
+
+        it('should returned decorator call BasePropDecorator with empty object if design:type metadata is empty on call', () => {
+            const target = class Target {};
+            const key = 'some key';
+
+            Prop()(target, key);
+
+            expect(BasePropDecoratorModule.BasePropDecorator).toHaveBeenCalledWith({});
+        });
+
+        it('should returned decorator call returned by BasePropDecorator decorator with given target and key on call', () => {
+            const target = class Target {};
+            const key = 'some key';
+
+            Prop()(target, key);
+
+            expect(decorator).toHaveBeenCalledWith(target, key);
+        });
+    });
 });

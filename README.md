@@ -23,7 +23,7 @@ This package needs `reflect-metadata` to work (you can find it [here](https://ww
 
 ## Immutable Model
 
-Immutable model allows you to create domain model for data that are completely immutable. The key is to just extend the model class with `ImmutableModel` and add `Prop` decorator for each property. The usage is as follows:
+Immutable model allows you to create domain model for data that is completely immutable. The key is to just extend the model class with `ImmutableModel` and add `Prop` decorator for each property. The usage is as follows:
 
 ```ts
 import { ImmutableModel, Prop } from 'model-typescript';
@@ -86,7 +86,7 @@ expect(data.someObject).not.toBe(model.someObject);
 
 Other complex types like own classes or packages are not handled. If you plan to use some mutable class the best case is to override `initModel` method (as it will affect also both `clone` and `set` methods) and handle cloning your custom classes there. Be sure to also lock your entity with `Object.freeze()` method or something custom.
 
-As some native JavaScript objects like `Set`, `Map` or `Date` can't be frozen, to gain 100% immutability I'd highly suggest to use [Immutable.js](https://npmjs.com/package/immutable) for data structure objects and [Luxon](https://npmjs.com/package/luxon) instead of `Date`.
+As some native JavaScript objects like `Set`, `Map` or `Date` can't be frozen, to gain 100% immutability I'd highly suggest to use [Immutable.js](https://npmjs.com/package/immutable) for data structure objects and [Luxon](https://npmjs.com/package/luxon) instead of `Date`. Then as those packages provide immutable objects, we don't need to handle additional steps during cloning models' values. Cloned reference in this case won't affect primary model.
 
 ```ts
 import moment from 'moment';
@@ -106,7 +106,7 @@ class UserModel extends ImmutableModel<UserModel> {
 
 ### Deep model nesting
 
-If you build model which some properties are another models, constructor will handle instantiate them on it's own. All you need to do is just provide data in plain object:
+If you build model which some properties are another models, constructor will handle instantiating them on it's own. All you need to do is just provide data in plain object:
 
 ```ts
 class AddressModel extends ImmutableModel<AddressModel> {
@@ -137,6 +137,27 @@ const user = new UserModel({
 ```
 
 So you don't need to worry about nested objects when putting eg. response from API directly into model
+
+But again if something in plain object with data needs to be transformed to some custom entity, it needs to be manually handled. Say we have date string and we want to transform it to `Luxon`. This case for example would go as follows:
+
+```ts
+class UserModel extends ImmutableModel<UserModel> {
+    @Prop public readonly username: string;
+    @Prop public readonly createdAt: Luxon.DateTime;
+}
+
+const data = {
+    username: 'some username',
+    createdAt: '2019-01-01',
+};
+
+const user = new UserModel({
+    ...data,
+    createdAt: Luxon.DateTime.fromISO(data.createdAt),  
+});
+```
+
+Just to mention, for this case we don't need also to handle cloning value of `createdAt` as `Luxon.DateTime` is immutable. Reference in our new cloned model won't affect any data in previous one. 
 
 ## Contribution
 
