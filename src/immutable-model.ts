@@ -38,7 +38,7 @@ export abstract class ImmutableModel<T> {
                     if (data[declaration.key] instanceof ImmutableModel) {
                         this[declaration.key] = data[declaration.key];
                     } else {
-                        this[declaration.key] = new declaration.model(data[declaration.key]);
+                        this[declaration.key] = new (declaration.model as any)(data[declaration.key]);
                     }
 
                     break;
