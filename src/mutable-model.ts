@@ -35,6 +35,8 @@ export abstract class MutableModel<T> extends Model {
     }
 
     public clone(deepClone: boolean = false): T {
+        // TODO: if model is frozen, deepClone should be the only option here
+        
         if (!deepClone) {
             return new (this.constructor as any)(this);
         }
