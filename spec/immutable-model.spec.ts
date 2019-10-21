@@ -1,4 +1,5 @@
-import { ImmutableModel, Prop } from '..';
+import { ImmutableModel, Prop } from '../src';
+import { MutableModel } from '../src';
 
 interface SomeObject {
     a: string;
@@ -24,6 +25,14 @@ class TestWithModel extends ImmutableModel<TestWithModel> {
 
 class TestWithDeepModel extends ImmutableModel<TestWithDeepModel> {
     @Prop public readonly deep: TestWithModel;
+}
+
+class TestMutableModel extends MutableModel<TestMutableModel> {
+    @Prop public name: string;
+}
+
+class TestWithMutableModel extends ImmutableModel<TestWithMutableModel> {
+    @Prop public readonly mutable: TestMutableModel;
 }
 
 describe('Immutable Model', () => {
@@ -113,6 +122,29 @@ describe('Immutable Model', () => {
             expect(model.deep).toBeInstanceOf(ImmutableModel);
             expect(model.deep.test).toBeInstanceOf(ImmutableModel);
         });
+
+        it('should create frozen mutable model', () => {
+            const model = new TestWithMutableModel({
+                mutable: {
+                    name: 'some name',
+                },
+            });
+
+            expect(model.mutable.isFrozen()).toBe(true);
+        });
+
+        it('should clone and freeze provided in data mutable model', () => {
+            const mutableModel = new TestMutableModel({
+                name: 'some name',
+            });
+            
+            const model = new TestWithMutableModel({
+                mutable: mutableModel,
+            });
+
+            expect(model.mutable).not.toBe(mutableModel);
+            expect(model.mutable.isFrozen()).toBe(true);
+        });
     });
 
     describe('Immutability', () => {
@@ -190,11 +222,12 @@ describe('Immutable Model', () => {
         });
 
         it('should clone all object values', () => {
-            
+            // TODO
         });
     });
 
     describe('clone() method', () => {
+        
         it('should clone itself', () => {
             const model = new TestModel({
                 id: 2,
