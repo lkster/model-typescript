@@ -5,16 +5,18 @@ import { PropertyTypeEnum } from './enums/property-type.enum';
 import { ObjectUtils } from './utils/object.utils';
 import { ModelPropertiesOf } from './types/model-properties-of.type';
 import { Model } from './model';
+import { PartialModelPropertiesOf } from './types/partial-model-properties-of.type';
 
 
 export abstract class ImmutableModel<T> extends Model {
 
-    public constructor(data: ModelPropertiesOf<T, ImmutableModel<any>>) {
+    public constructor(data: ModelPropertiesOf<T, Model>) {
+        super();
         this.initModel(data);
         Object.freeze(this);
     }
 
-    public set(data: Partial<ModelPropertiesOf<T, ImmutableModel<any>>>): T {
+    public set(data: PartialModelPropertiesOf<T, Model>): T {
         return new (this as any).constructor({
             ...this,
             ...data,
