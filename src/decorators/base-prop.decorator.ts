@@ -2,8 +2,8 @@ import util from 'util';
 import { TPropertyKey } from '../types/property-key.type';
 import { IPropertyDeclaration } from '../interfaces/property-declaration.interface';
 import { MODEL_PROPS_METADATA_KEY } from '../constants/metadata-keys';
-import { ImmutableModel } from '..';
 import { PropertyTypeEnum } from '../enums/property-type.enum';
+import { Model } from '../model';
 
 
 export function BasePropDecorator(model: any): PropertyDecorator {
@@ -13,7 +13,7 @@ export function BasePropDecorator(model: any): PropertyDecorator {
 
         let propertyDeclaration: IPropertyDeclaration;
         
-        if (model.prototype instanceof ImmutableModel) {
+        if (model.prototype instanceof Model) {
             propertyDeclaration = {
                 key,
                 model,

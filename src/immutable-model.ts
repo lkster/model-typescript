@@ -4,9 +4,10 @@ import { IPropertyDeclaration } from './interfaces/property-declaration.interfac
 import { PropertyTypeEnum } from './enums/property-type.enum';
 import { ObjectUtils } from './utils/object.utils';
 import { ModelPropertiesOf } from './types/model-properties-of.type';
+import { Model } from './model';
 
 
-export abstract class ImmutableModel<T> {
+export abstract class ImmutableModel<T> extends Model {
 
     public constructor(data: ModelPropertiesOf<T, ImmutableModel<any>>) {
         this.initModel(data);
