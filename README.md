@@ -6,8 +6,15 @@ Utilities for creating mutable and immutable models supported by TypeScript
 
 1. [Getting Started](#getting-started)
 1. [Immutable Model](#immutable-model)
+    1. [Updating Data](#updating-data)
+    1. [Cloning Model](#cloning-model)
     1. [Complex Types](#complex-types)
     1. [Deep Model Nesting](#deep-model-nesting)
+1. [Mutable Model](#mutable-model)
+    1. [Updating Data](#updating-data-1)
+    1. [Cloning Model](#cloning-model-1)
+    1. [Freezing Model](#freezing-model)
+1. [ModelRef decorator](#model-ref)
 1. [Contribution](#contribution)
 1. [What's To Do](#whats-to-do)
 
@@ -19,11 +26,11 @@ Install `model-typescript` with [npm](https://www.npmjs.com/)
 $ npm install model-typescript
 ```
 
-This package needs `reflect-metadata` to work (you can find it [here](https://www.npmjs.com/package/reflect-metadata)) and `emitDecoratorMetadata` option in `tsconfig.json` set to `true`. (until equivalent is released, more info below in todo list)
+This package needs `reflect-metadata` to work (you can find it [here](https://www.npmjs.com/package/reflect-metadata)). Recommended is also enabling `emitDecoratorMetadata` option in `tsconfig.json`. If this is not possible then look at `ModelRef` decorator.
 
 ## Immutable Model
 
-Immutable model allows you to create domain model for data that is completely immutable. The key is to just extend the model class with `ImmutableModel` and add `Prop` decorator for each property. The usage is as follows:
+Immutable model allows you to create domain model for data that is completely immutable. The key is to just extend the model class with `ImmutableModel` and add `@Prop` decorator for each property. The usage is as follows:
 
 ```ts
 import { ImmutableModel, Prop } from 'model-typescript';
@@ -34,7 +41,7 @@ class UserModel extends ImmutableModel<UserModel> {
 }
 ```
 
-As you can see, `ImmutableModel` takes generic as the exact model that is being defined. This is needed for proper typing during compilation and intellisense when providing data to the model.
+As you can see, `ImmutableModel` takes generic as the exact model that is being defined. This is needed for proper typing during compilation and intellisense when providing data to the model. Also to mention, the `@Prop` decorator can be used like it was aboce or with parens like `@Prop()`.
 
 Now when we instantiate it, we can provide data with object literal. After that model is immutable.
 
@@ -44,6 +51,8 @@ const user = new UserModel({
     username: 'some username',
 });
 ```
+
+### Updating Data
 
 If you want to change the data in model, there is `set` method which takes `Partial` of model's properties (i.e. you can provide only part of the new data model actually can handle) and creates new instance of the model with updated data. The data in old model remains unchanged
 
@@ -66,7 +75,9 @@ user = user.set({
 // now user.username is 'some new username'
 ```
 
-`ImmutableModel` provides also `clone` method which is just alias for `set({})` (`set` with empty object i.e. no data provided to be changed)
+### Cloning Model
+
+`ImmutableModel` provides `clone` method which is just alias for `set({})` (`set` with empty object i.e. no data provided to be changed). It returns new deep cloned model.
 
 ### Complex types
 
@@ -158,6 +169,142 @@ const user = new UserModel({
 ```
 
 Just to mention, for this case we don't need also to handle cloning value of `createdAt` as `Luxon.DateTime` is immutable. Reference in our new cloned model won't affect any data in previous one. 
+
+Btw. if you make property as type of some `MutableModel`, it will be frozen with it's `freeze` method. More about it under.
+
+## Mutable Model
+
+Mutable model, as it says, is mutable. Also it doesn't copy any of your object (except some cases, more about that later), just puts reference to object you provide.
+
+```ts
+class ContactModel extends MutableModel<ContactModel> {
+    @Prop public email: string;
+}
+
+class UserModel extends MutableModel<UserModel> {
+    @Prop public username: string;
+    @Prop public contactDetails: ContactModel;
+}
+
+const contactDetails = new ContactModel({
+    email: 'some@user.com'
+});
+
+const user = new UserModel({
+    contactDetails,
+    username: 'some username',
+});
+
+expect(user.contactDetails).toBe(contactDetails);
+```
+
+### Updating Data
+
+There are two possibilities to update data. If you want to simply update some value, just use getter:
+
+```ts
+const user = new UserModel({
+    username: 'some name',
+});
+
+user.username = 'some new user';
+```
+
+If you have more properties to update, you can use `set` method.
+
+```ts
+const user = new UserModel({
+    username: 'some name',
+    contactDetails: {
+        email: 'some@email.com',
+    },
+});
+
+user.set({
+    username: 'some new name',
+    contactDetails: {
+        email: 'some@newemail.com',
+    },
+});
+```
+
+`Set` method in this case will update models recursively if they're mutable or assign new if they're immutable. If you provide new model in object data then the old one will be replaced.
+
+
+### Cloning Model
+
+As immutable model, mutable one also provides `clone` method which cloned whole model. the difference is it can take parameter which defines whether clone is supposed to be deep or not. If clone is not deep (this is the standard one) then new model will have passed same references to complex types as the old model.
+
+```ts
+const user = new UserModel({
+    username: 'some name',
+    contactDetails: {
+        email: 'some@email.com',
+    },
+});
+
+const clonedModel = user.clone();
+
+expect(user.contactDetails).toBe(clonedModel.contactDetails);
+```
+
+If however the `deepClone` parameter is set to `true` then all values will be also cloned.
+
+```ts
+const user = new UserModel({
+    username: 'some name',
+    contactDetails: {
+        email: 'some@email.com',
+    },
+});
+
+const clonedModel = user.clone(true);
+
+expect(user.contactDetails).not.toBe(clonedModel.contactDetails);
+```
+
+### Freezing Model
+
+Freezing mutable model is like making it immutable. After freeze, model can't have any new values assigned. It affects also nested models or objects. However all objects and models are cloned before freeze so there won't be a situation that you passes model from outside and now have it completely immutable.
+
+
+```ts
+
+const contactDetails = new ContactModel({
+    email: 'some@email.com',
+});
+
+const user = new UserModel({
+    contactDetails,
+    username: 'some name',
+});
+
+
+expect(user.contactDetails).toBe(contactDetails);
+
+user.freeze();
+
+expect(user.contactDetails).not.toBe(contactDetails);
+
+expect(contactDetails.isFrozen()).toBe(false);
+expect(user.contactDetails.isFrozen()).toBe(true);
+```
+
+As you saw, there is also `isFrozen` method which returns `boolean` whether model is actually frozen.
+
+## ModelRef Decorator
+
+Normally `@Prop` decorator handles nested models defining because of what you can just put plain data object in constructor and models will be created automatically. To allow this to happen you need to have `emitDecoratorsMetadata` enabled in your `tsconfig.json`. In case this is not possible, there is `@ModelRef` decorator to solve this. Simply use it in place of `@Prop` when you're defining property which has type of some another model and provide it's class as parameter:
+
+```ts
+class UserModel extends ImmutableModel<UserModel> {
+    @Prop() 
+    public readonly username: string;
+    
+    @ModelRef(ContactModel) 
+    public readonly contactDetails: ContactModel;
+}
+```
 
 ## Contribution
 
