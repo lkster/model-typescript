@@ -282,4 +282,62 @@ describe('Mutable Model', () => {
             expect(clonedModel.deep.test).not.toBe(model.deep.test);
         });
     });
+
+    describe('Freeze() method', () => {
+        
+        it('should clone all objects', () => {
+            const complexObject = {
+                a: 'something',
+                b: {
+                    c: 4,
+                },
+            };
+
+            const mutableModel = new TestModel({
+                id: 2,
+                name: 'some mutable name',
+            });
+
+            const immutableModel = new TestImmutableModel({
+                name: 'some immutable name',
+            });
+
+            const model = new TestObjectModel({
+                complex: complexObject,
+                mutable: mutableModel,
+                immutable: immutableModel
+            });
+
+            model.freeze();
+
+            expect(model.complex).not.toBe(complexObject);
+            expect(model.mutable).not.toBe(mutableModel);
+            expect(model.immutable).not.toBe(immutableModel);
+        });
+
+        it('should freeze itself and all depended objects', () => {
+            const model = new TestObjectModel({
+                complex: {
+                    a: 'something',
+                    b: {
+                        c: 4,
+                    },
+                },
+                mutable: {
+                    id: 2,
+                    name: 'some mutable name',
+                },
+                immutable: {
+                    name: 'some immutable name',
+                }
+            });
+
+            model.freeze();
+
+            expect(Object.isFrozen(model)).toBe(true);
+            expect(Object.isFrozen(model.complex)).toBe(true);
+            expect(Object.isFrozen(model.mutable)).toBe(true);
+            expect(Object.isFrozen(model.immutable)).toBe(true);
+        });
+    });
 });

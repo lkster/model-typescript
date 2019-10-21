@@ -7,6 +7,7 @@ import { PropertyTypeEnum } from './enums/property-type.enum';
 import { Model } from './model';
 import { ImmutableModel } from './immutable-model';
 import { PartialModelPropertiesOf } from './types/partial-model-properties-of.type';
+import { ObjectUtils } from './utils/object.utils';
 
 
 export abstract class MutableModel<T> extends Model {
@@ -17,6 +18,10 @@ export abstract class MutableModel<T> extends Model {
     }
 
     public set(data: PartialModelPropertiesOf<T, Model>): this {
+        if (Object.isFrozen(this)) {
+            return this;
+        }
+
         const properties: IPropertyDeclaration[] = Reflect.getMetadata(MODEL_PROPS_METADATA_KEY, this.constructor);
 
         for (let declaration of properties) {
@@ -45,6 +50,23 @@ export abstract class MutableModel<T> extends Model {
         return new (this.constructor as any)(newData);
     }
 
+    public freeze(): this {
+        const properties: IPropertyDeclaration[] = Reflect.getMetadata(MODEL_PROPS_METADATA_KEY, this.constructor);
+
+        for (let declaration of properties) {
+            this[declaration.key] = this.cloneProperty(declaration, this[declaration.key]);
+            this.freezeProperty(declaration, this[declaration.key]);            
+        }
+
+        Object.freeze(this);
+
+        return this;
+    }
+
+    public isFrozen(): boolean {
+        return Object.isFrozen(this);
+    }
+
     private initModel(data: ModelPropertiesOf<T, Model>): void {
         const properties: IPropertyDeclaration[] = Reflect.getMetadata(MODEL_PROPS_METADATA_KEY, this.constructor);
 
@@ -64,6 +86,20 @@ export abstract class MutableModel<T> extends Model {
                     return value.clone(true);
                 } else {
                     return value.clone();
+                }
+            }
+        }
+    }
+
+    private freezeProperty(propertyMetadata: IPropertyDeclaration, value: any): void {
+        switch (propertyMetadata.type) {
+            case PropertyTypeEnum.PROPERTY: {
+                ObjectUtils.deepFreeze(value);
+            }
+            
+            case PropertyTypeEnum.MODEL_REF: {
+                if (value instanceof MutableModel) {
+                    value.freeze();
                 }
             }
         }
