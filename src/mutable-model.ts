@@ -10,14 +10,9 @@ import { PartialModelPropertiesOf } from './types/partial-model-properties-of.ty
 import { ObjectUtils } from './utils/object.utils';
 
 
-export abstract class MutableModel<T> extends Model {
+export abstract class MutableModel<T> extends Model<any> {
 
-    public constructor(data: ModelPropertiesOf<T, Model>) {
-        super();
-        this.initModel(data);
-    }
-
-    public set(data: PartialModelPropertiesOf<T, Model>): this {
+    public set(data: PartialModelPropertiesOf<T, Model<any>>): this {
         if (Object.isFrozen(this)) {
             return this;
         }
@@ -41,7 +36,7 @@ export abstract class MutableModel<T> extends Model {
             return new (this.constructor as any)(this);
         }
 
-        const newData: ModelPropertiesOf<T, Model> = {} as any;
+        const newData: ModelPropertiesOf<T, Model<any>> = {} as any;
 
         const properties: IPropertyDeclaration[] = Reflect.getMetadata(MODEL_PROPS_METADATA_KEY, this.constructor);
 
@@ -69,15 +64,7 @@ export abstract class MutableModel<T> extends Model {
         return Object.isFrozen(this);
     }
 
-    private initModel(data: ModelPropertiesOf<T, Model>): void {
-        const properties: IPropertyDeclaration[] = Reflect.getMetadata(MODEL_PROPS_METADATA_KEY, this.constructor);
-
-        for (let declaration of properties) {
-            this.defineProperty(declaration, data[declaration.key]);
-        }
-    }
-
-    private cloneProperty(propertyMetadata: IPropertyDeclaration, value: any): any {
+    protected cloneProperty(propertyMetadata: IPropertyDeclaration, value: any): any {
         switch (propertyMetadata.type) {
             case PropertyTypeEnum.PROPERTY: {
                 return deepCloneFn(value);
@@ -93,7 +80,7 @@ export abstract class MutableModel<T> extends Model {
         }
     }
 
-    private freezeProperty(propertyMetadata: IPropertyDeclaration, value: any): void {
+    protected freezeProperty(propertyMetadata: IPropertyDeclaration, value: any): void {
         switch (propertyMetadata.type) {
             case PropertyTypeEnum.PROPERTY: {
                 ObjectUtils.deepFreeze(value);
@@ -107,7 +94,7 @@ export abstract class MutableModel<T> extends Model {
         }
     }
 
-    private defineProperty(propertyMetadata: IPropertyDeclaration, value: any): void {
+    protected defineProperty(propertyMetadata: IPropertyDeclaration, value: any): void {
         switch (propertyMetadata.type) {
             case PropertyTypeEnum.PROPERTY: {
                 this[propertyMetadata.key] = value;

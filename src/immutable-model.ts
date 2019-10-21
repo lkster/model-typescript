@@ -1,5 +1,4 @@
 import deepClone from 'clone-deep';
-import { MODEL_PROPS_METADATA_KEY } from './constants/metadata-keys';
 import { IPropertyDeclaration } from './interfaces/property-declaration.interface';
 import { PropertyTypeEnum } from './enums/property-type.enum';
 import { ObjectUtils } from './utils/object.utils';
@@ -9,15 +8,14 @@ import { PartialModelPropertiesOf } from './types/partial-model-properties-of.ty
 import { MutableModel } from '.';
 
 
-export abstract class ImmutableModel<T> extends Model {
+export abstract class ImmutableModel<T> extends Model<T> {
 
-    public constructor(data: ModelPropertiesOf<T, Model>) {
-        super();
-        this.initModel(data);
+    public constructor(data: ModelPropertiesOf<T, Model<any>>) {
+        super(data);
         Object.freeze(this);
     }
 
-    public set(data: PartialModelPropertiesOf<T, Model>): T {
+    public set(data: PartialModelPropertiesOf<T, Model<any>>): T {
         return new (this as any).constructor({
             ...this,
             ...data,
@@ -28,30 +26,26 @@ export abstract class ImmutableModel<T> extends Model {
         return this.set({});
     }
 
-    private initModel(data: any): void {
-        const properties: IPropertyDeclaration[] = Reflect.getMetadata(MODEL_PROPS_METADATA_KEY, this.constructor);
-
-        for (let declaration of properties) {
-            switch (declaration.type) {
-                case PropertyTypeEnum.PROPERTY: {
-                    this[declaration.key] = ObjectUtils.deepFreeze(deepClone(data[declaration.key]));
-                    break;
+    protected defineProperty(propertyMetadata: IPropertyDeclaration, value: any): void {
+        switch (propertyMetadata.type) {
+            case PropertyTypeEnum.PROPERTY: {
+                this[propertyMetadata.key] = ObjectUtils.deepFreeze(deepClone(value));
+                break;
+            }
+            
+            case PropertyTypeEnum.MODEL_REF: {
+                if (value instanceof ImmutableModel) {
+                    this[propertyMetadata.key] = value;
+                } else if (value instanceof MutableModel) {
+                    this[propertyMetadata.key] = value.clone().freeze();
+                } else if (propertyMetadata.model.prototype instanceof MutableModel) {
+                    this[propertyMetadata.key] = new (propertyMetadata.model as any)(value);
+                    this[propertyMetadata.key] = this[propertyMetadata.key].freeze();
+                } else {
+                    this[propertyMetadata.key] = new (propertyMetadata.model as any)(value);
                 }
-                
-                case PropertyTypeEnum.MODEL_REF: {
-                    if (data[declaration.key] instanceof ImmutableModel) {
-                        this[declaration.key] = data[declaration.key];
-                    } else if (data[declaration.key] instanceof MutableModel) {
-                        this[declaration.key] = data[declaration.key].clone().freeze();
-                    } else if (declaration.model.prototype instanceof MutableModel) {
-                        this[declaration.key] = new (declaration.model as any)(data[declaration.key]);
-                        this[declaration.key] = this[declaration.key].freeze();
-                    } else {
-                        this[declaration.key] = new (declaration.model as any)(data[declaration.key]);
-                    }
 
-                    break;
-                }
+                break;
             }
         }
     }
