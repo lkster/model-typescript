@@ -6,6 +6,7 @@ import { ObjectUtils } from './utils/object.utils';
 import { ModelPropertiesOf } from './types/model-properties-of.type';
 import { Model } from './model';
 import { PartialModelPropertiesOf } from './types/partial-model-properties-of.type';
+import { MutableModel } from '.';
 
 
 export abstract class ImmutableModel<T> extends Model {
@@ -40,6 +41,11 @@ export abstract class ImmutableModel<T> extends Model {
                 case PropertyTypeEnum.MODEL_REF: {
                     if (data[declaration.key] instanceof ImmutableModel) {
                         this[declaration.key] = data[declaration.key];
+                    } else if (data[declaration.key] instanceof MutableModel) {
+                        this[declaration.key] = data[declaration.key].clone().freeze();
+                    } else if (declaration.model.prototype instanceof MutableModel) {
+                        this[declaration.key] = new (declaration.model as any)(data[declaration.key]);
+                        this[declaration.key] = this[declaration.key].freeze();
                     } else {
                         this[declaration.key] = new (declaration.model as any)(data[declaration.key]);
                     }
