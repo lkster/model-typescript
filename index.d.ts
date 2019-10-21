@@ -1,1 +1,1 @@
-export { ImmutableModel, Prop } from './dist';
+export * from './dist';
