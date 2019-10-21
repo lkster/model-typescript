@@ -4,16 +4,20 @@ import { IPropertyDeclaration } from './interfaces/property-declaration.interfac
 import { PropertyTypeEnum } from './enums/property-type.enum';
 import { ObjectUtils } from './utils/object.utils';
 import { ModelPropertiesOf } from './types/model-properties-of.type';
+import { Model } from './model';
+import { PartialModelPropertiesOf } from './types/partial-model-properties-of.type';
+import { MutableModel } from '.';
 
 
-export abstract class ImmutableModel<T> {
+export abstract class ImmutableModel<T> extends Model {
 
-    public constructor(data: ModelPropertiesOf<T, ImmutableModel<any>>) {
+    public constructor(data: ModelPropertiesOf<T, Model>) {
+        super();
         this.initModel(data);
         Object.freeze(this);
     }
 
-    public set(data: Partial<ModelPropertiesOf<T, ImmutableModel<any>>>): T {
+    public set(data: PartialModelPropertiesOf<T, Model>): T {
         return new (this as any).constructor({
             ...this,
             ...data,
@@ -37,8 +41,13 @@ export abstract class ImmutableModel<T> {
                 case PropertyTypeEnum.MODEL_REF: {
                     if (data[declaration.key] instanceof ImmutableModel) {
                         this[declaration.key] = data[declaration.key];
+                    } else if (data[declaration.key] instanceof MutableModel) {
+                        this[declaration.key] = data[declaration.key].clone().freeze();
+                    } else if (declaration.model.prototype instanceof MutableModel) {
+                        this[declaration.key] = new (declaration.model as any)(data[declaration.key]);
+                        this[declaration.key] = this[declaration.key].freeze();
                     } else {
-                        this[declaration.key] = new declaration.model(data[declaration.key]);
+                        this[declaration.key] = new (declaration.model as any)(data[declaration.key]);
                     }
 
                     break;
