@@ -8,4 +8,4 @@ type RawPartialModelPropertiesOf<T, BASE> = Partial<{
         T[Key] extends BASE ? RawPartialModelPropertiesOf<T[Key], BASE> | T[Key] : T[Key]
 }>;
 
-export type PartialModelPropertiesOf<T, BASE = Model> = Partial<Pick<RawPartialModelPropertiesOf<T, BASE>, PropertiesKeysOf<T>>>;
+export type PartialModelPropertiesOf<T, BASE = Model<any>> = Partial<Pick<RawPartialModelPropertiesOf<T, BASE>, PropertiesKeysOf<T>>>;

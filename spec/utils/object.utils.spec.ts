@@ -1,4 +1,4 @@
-import { ObjectUtils } from '../../dist/utils/object.utils';
+import { ObjectUtils } from '../../src/utils/object.utils';
 
 describe('Object Utils', () => {
     

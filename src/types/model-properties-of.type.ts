@@ -7,4 +7,4 @@ type RawModelPropertiesOf<T, BASE> = {
         T[Key] extends BASE ? ModelPropertiesOf<T[Key], BASE> | T[Key] : T[Key]
 };
 
-export type ModelPropertiesOf<T, BASE = Model> = Pick<RawModelPropertiesOf<T, BASE>, PropertiesKeysOf<T>>;
+export type ModelPropertiesOf<T, BASE = Model<any>> = Pick<RawModelPropertiesOf<T, BASE>, PropertiesKeysOf<T>>;
