@@ -16,7 +16,6 @@ Utilities for creating mutable and immutable models supported by TypeScript
     1. [Freezing Model](#freezing-model)
 1. [ModelRef decorator](#model-ref)
 1. [Contribution](#contribution)
-1. [What's To Do](#whats-to-do)
 
 ## Getting Started
 
@@ -41,7 +40,7 @@ class UserModel extends ImmutableModel<UserModel> {
 }
 ```
 
-As you can see, `ImmutableModel` takes generic as the exact model that is being defined. This is needed for proper typing during compilation and intellisense when providing data to the model. Also to mention, the `@Prop` decorator can be used like it was aboce or with parens like `@Prop()`.
+As you can see, `ImmutableModel` takes generic as the exact model that is being defined. This is needed for proper typing during compilation and intellisense when providing data to the model. Also to mention, the `@Prop` decorator can be used like it was above or with parens like `@Prop()`.
 
 Now when we instantiate it, we can provide data with object literal. After that model is immutable.
 
@@ -54,7 +53,7 @@ const user = new UserModel({
 
 ### Updating Data
 
-If you want to change the data in model, there is `set` method which takes `Partial` of model's properties (i.e. you can provide only part of the new data model actually can handle) and creates new instance of the model with updated data. The data in old model remains unchanged
+If you want to change the data in model, there is `set` method which takes `Partial` of model's properties (i.e. you can provide just a part of the new data model actually can handle) and creates new instance of the model with updated data. The data in old model remains unchanged
 
 ```ts
 let user = new UserModel({
@@ -77,7 +76,19 @@ user = user.set({
 
 ### Cloning Model
 
-`ImmutableModel` provides `clone` method which is just alias for `set({})` (`set` with empty object i.e. no data provided to be changed). It returns new deep cloned model.
+`ImmutableModel` provides `clone` method which is just alias for `set({})` (`set` with empty object i.e. no data provided to be changed). It returns new deep cloned model. If you have some object in model that is non-native and mutable then it's good to override the method and handle this case:
+
+```ts
+class UserModel extends ImmutableModel<UserModel> {
+    @Prop public readonly createdAt: moment.Moment;
+
+    public clone(): UserModel {
+        return this.set({
+            createdAt: moment(moment),
+        });
+    }
+}
+```
 
 ### Complex types
 
@@ -95,9 +106,7 @@ const model = new DataModel(data);
 expect(data.someObject).not.toBe(model.someObject);
 ```
 
-Other complex types like own classes or packages are not handled. If you plan to use some mutable class the best case is to override `initModel` method (as it will affect also both `clone` and `set` methods) and handle cloning your custom classes there. Be sure to also lock your entity with `Object.freeze()` method or something custom.
-
-As some native JavaScript objects like `Set`, `Map` or `Date` can't be frozen, to gain 100% immutability I'd highly suggest to use [Immutable.js](https://npmjs.com/package/immutable) for data structure objects and [Luxon](https://npmjs.com/package/luxon) instead of `Date`. Then as those packages provide immutable objects, we don't need to handle additional steps during cloning models' values. Cloned reference in this case won't affect primary model.
+Other complex types like own classes or packages are not handled. If you plan to use some mutable class the best case is to override `defineProperty` method (as it will affect also both `clone` and `set` methods) and handle cloning your custom classes there. Be sure to also lock your entity with `Object.freeze()` method or something custom.
 
 ```ts
 import moment from 'moment';
@@ -114,6 +123,8 @@ class UserModel extends ImmutableModel<UserModel> {
     }
 }
 ```
+
+As some native JavaScript objects like `Set`, `Map` or `Date` can't be frozen, to gain 100% immutability I'd highly suggest to use [Immutable.js](https://npmjs.com/package/immutable) for data structure objects and [Luxon](https://npmjs.com/package/luxon) instead of `Date` (unless you have other or own solutions). Then as those packages provide immutable objects, we don't need to handle additional steps during cloning models' values. Cloned reference in this case won't affect primary model.
 
 ### Deep model nesting
 
@@ -170,7 +181,7 @@ const user = new UserModel({
 
 Just to mention, for this case we don't need also to handle cloning value of `createdAt` as `Luxon.DateTime` is immutable. Reference in our new cloned model won't affect any data in previous one. 
 
-Btw. if you make property as type of some `MutableModel`, it will be frozen with it's `freeze` method. More about it under.
+Btw. if you'd make property as type of some `MutableModel`, it will be frozen with it's `freeze` method. More about it under.
 
 ## Mutable Model
 
@@ -233,7 +244,7 @@ user.set({
 
 ### Cloning Model
 
-As immutable model, mutable one also provides `clone` method which cloned whole model. the difference is it can take parameter which defines whether clone is supposed to be deep or not. If clone is not deep (this is the standard one) then new model will have passed same references to complex types as the old model.
+As immutable model, mutable one also provides `clone` method which clones whole model. The difference is it can take parameter which defines whether clone is supposed to be deep or not. If clone is not deep (this is the standard one) then new model will have passed same references to complex types as the old model.
 
 ```ts
 const user = new UserModel({
@@ -294,7 +305,7 @@ As you saw, there is also `isFrozen` method which returns `boolean` whether mode
 
 ## ModelRef Decorator
 
-Normally `@Prop` decorator handles nested models defining because of what you can just put plain data object in constructor and models will be created automatically. To allow this to happen you need to have `emitDecoratorsMetadata` enabled in your `tsconfig.json`. In case this is not possible, there is `@ModelRef` decorator to solve this. Simply use it in place of `@Prop` when you're defining property which has type of some another model and provide it's class as parameter:
+Normally `@Prop` decorator handles nested models defining because of what you can just put plain data object in constructor and models will be created automatically. To allow this to happen you need to have `emitDecoratorsMetadata` enabled in your `tsconfig.json` as the decorator bases on reflect metadata about type. In case this is not possible, there is `@ModelRef` decorator to solve this. Simply use it in place of `@Prop` when you're defining property which has type of some another model and provide it's class as parameter:
 
 ```ts
 class UserModel extends ImmutableModel<UserModel> {
@@ -316,10 +327,3 @@ To help development on this project there are few npm scripts:
 - `npm run build` - removes `dist` directory and builds whole project
 - `npm run clean` - removes `dist` directory
 - `npm run test` - runs unit tests
-
-## What's To Do
-
-- `ModelRef` decorator in case of no `emitDecoratorMetadata` available to set
-- Mutable model implementation
-- Global transformers in case of having lot of custom objects values (like `moment` in almost all models). This after setting it up would handle cloning and freezing custom objects out-of-box
-- Anything you'd suggest (of course within reason lol)
