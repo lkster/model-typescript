@@ -1,5 +1,10 @@
 # model-typescript
 
+[![npm](https://img.shields.io/npm/v/model-typescript?style=flat-square)](https://npmjs.com/package/model-typescript)
+[![GitHub](https://img.shields.io/github/license/thafog/model-typescript?style=flat-square)](https://github.com/ThaFog/model-typescript/blob/master/LICENSE)
+[![Travis (.org) branch](https://img.shields.io/travis/thafog/model-typescript/master?style=flat-square)](https://travis-ci.org/ThaFog/model-typescript)
+[![Coveralls github branch](https://img.shields.io/coveralls/github/ThaFog/model-typescript/master?style=flat-square)](https://coveralls.io/github/ThaFog/model-typescript?branch=master)
+
 Utilities for creating mutable and immutable models supported by TypeScript
 
 ## Table of Contents
