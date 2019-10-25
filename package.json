@@ -7,8 +7,10 @@
     "ts",
     "model",
     "immutable",
+    "mutable",
     "decorator",
-    "domain"
+    "domain",
+    "data"
   ],
   "main": "dist/index.js",
   "types": "index.d.ts",
