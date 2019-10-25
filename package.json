@@ -19,6 +19,8 @@
     "clean": "rimraf dist",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:coveralls": "npm run test:coverage && cat ./coverage/lcov.info | coveralls",
     "prepublish": "npm run build"
   },
   "author": "Dominik Mielcarek",
@@ -31,6 +33,7 @@
     "@types/clone-deep": "^4.0.1",
     "@types/jest": "^24.0.19",
     "@types/node": "^12.11.1",
+    "coveralls": "^3.0.7",
     "jest": "^24.9.0",
     "rimraf": "^3.0.0",
     "ts-jest": "^24.1.0",
