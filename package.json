@@ -17,7 +17,8 @@
   "scripts": {
     "build": "npm run clean && tsc -p tsconfig.json",
     "clean": "rimraf dist",
-    "test": "jest --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "prepublish": "npm run build"
   },
   "author": "Dominik Mielcarek",
