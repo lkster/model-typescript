@@ -35,6 +35,10 @@ class TestWithMutableModel extends ImmutableModel<TestWithMutableModel> {
     @Prop public readonly mutable: TestMutableModel;
 }
 
+class TestWithOptionalModel extends ImmutableModel<TestWithOptionalModel> {
+    @Prop public readonly test?: TestModel;
+}
+
 describe('Immutable Model', () => {
 
     describe('Instantiation', () => {
@@ -144,6 +148,14 @@ describe('Immutable Model', () => {
 
             expect(model.mutable).not.toBe(mutableModel);
             expect(model.mutable.isFrozen()).toBe(true);
+        });
+
+        it('should do nothing if value provided to optional property of model type is undefined', () => {
+            const model: TestWithOptionalModel = new TestWithOptionalModel({
+                test: undefined,
+            });
+
+            expect(model.test).toBeUndefined();
         });
     });
 
