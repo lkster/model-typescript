@@ -37,6 +37,10 @@ class TestObjectModel extends MutableModel<TestObjectModel> {
     @Prop public immutable: TestImmutableModel;
 }
 
+class TestWithOptionalModel extends MutableModel<TestWithOptionalModel> {
+    @Prop public test?: TestModel;
+}
+
 describe('Mutable Model', () => {
     
     describe('Instantiation', () => {
@@ -112,6 +116,14 @@ describe('Mutable Model', () => {
             });
 
             expect(model.immutable).toBeInstanceOf(ImmutableModel);
+        });
+
+        it('should do nothing if value provided to optional property of model type is undefined', () => {
+            const model: TestWithOptionalModel = new TestWithOptionalModel({
+                test: undefined,
+            });
+
+            expect(model.test).toBeUndefined();
         });
     });
 

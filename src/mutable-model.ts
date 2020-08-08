@@ -108,10 +108,12 @@ export abstract class MutableModel<T> extends Model<any> {
                     this[propertyMetadata.key].set(value);
                 } else if (this[propertyMetadata.key] instanceof ImmutableModel) {
                     this[propertyMetadata.key] = this[propertyMetadata.key].set(value);
-                } else {
+                } else if (ObjectUtils.isPlainObject(value)) {
                     this[propertyMetadata.key] = new (propertyMetadata.model as any)(value);
+                } else {
+                    this[propertyMetadata.key] = value;
                 }
-
+                
                 break;
             }
         }
