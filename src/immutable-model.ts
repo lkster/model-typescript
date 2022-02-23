@@ -5,7 +5,7 @@ import { ObjectUtils } from './utils/object.utils';
 import { ModelPropertiesOf } from './types/model-properties-of.type';
 import { Model } from './model';
 import { PartialModelPropertiesOf } from './types/partial-model-properties-of.type';
-import { MutableModel } from '.';
+import { MutableModel } from './mutable-model';
 
 
 export abstract class ImmutableModel<T> extends Model<T> {

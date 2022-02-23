@@ -1,5 +1,3 @@
-import util from 'util';
-
 export class ObjectUtils {
 
     // https://stackoverflow.com/a/1482209/3788615
@@ -38,7 +36,7 @@ export class ObjectUtils {
             }
 
             return object;
-        } else if (util.isArray(object)) {
+        } else if (Array.isArray(object)) {
             Object.freeze(object);
 
             for (const value of object) {
