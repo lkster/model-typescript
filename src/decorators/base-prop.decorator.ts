@@ -1,4 +1,3 @@
-import util from 'util';
 import { TPropertyKey } from '../types/property-key.type';
 import { IPropertyDeclaration } from '../interfaces/property-declaration.interface';
 import { MODEL_PROPS_METADATA_KEY } from '../constants/metadata-keys';
@@ -26,7 +25,7 @@ export function BasePropDecorator(model: any): PropertyDecorator {
             }
         }
 
-        if (util.isArray(props)) {
+        if (Array.isArray(props)) {
             props.push(propertyDeclaration);
         } else {
             props = [propertyDeclaration];
