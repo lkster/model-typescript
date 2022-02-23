@@ -1,4 +1,3 @@
-import util from 'util';
 import deepCloneFn from 'clone-deep';
 import { ModelPropertiesOf } from './types/model-properties-of.type';
 import { IPropertyDeclaration } from './interfaces/property-declaration.interface';
@@ -20,7 +19,7 @@ export abstract class MutableModel<T> extends Model<any> {
         const properties: IPropertyDeclaration[] = Reflect.getMetadata(MODEL_PROPS_METADATA_KEY, this.constructor);
 
         for (let declaration of properties) {
-            if (util.isNullOrUndefined(data[declaration.key])) {
+            if (data[declaration.key] == null) {
                 continue;
             }
 
